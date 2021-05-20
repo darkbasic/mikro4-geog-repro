@@ -1,0 +1,63 @@
+{
+  "name": "sports",
+  "version": "0.0.1",
+  "description": "",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "files": [
+    "build/src"
+  ],
+  "license": "Apache-2.0",
+  "keywords": [],
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm/config.ts",
+      "./build/src/mikro-orm/config.js"
+    ]
+  },
+  "scripts": {
+    "start": "ts-node --files src/index.ts",
+    "prestart:js": "yarn run compile",
+    "start:js": "node build/src/index.js",
+    "test": "jest",
+    "lint": "gts lint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "clean": "gts clean",
+    "precompile": "yarn run clean && yarn run fix",
+    "compile": "tsc -p .",
+    "postcompile": "copyfiles \"src/**/*.graphql\" build",
+    "fix": "gts fix \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "prepare": "yarn run compile"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.3.0",
+    "copyfiles": "^2.4.1",
+    "gts": "^3.1.0",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.6",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "@mikro-orm/cli": "^4.5.5",
+    "@mikro-orm/core": "^4.5.5",
+    "@mikro-orm/entity-generator": "^4.5.5",
+    "@mikro-orm/knex": "^4.5.5",
+    "@mikro-orm/migrations": "^4.5.5",
+    "@mikro-orm/postgresql": "^4.5.5",
+    "@mikro-orm/reflection": "^4.5.5",
+    "date-fns": "^2.21.3",
+    "geojson": "^0.5.0",
+    "knex-postgis": "^0.13.0",
+    "reflect-metadata": "^0.1.13",
+    "wkx": "^0.5.0"
+  },
+  "resolutions": {},
+  "jest": {
+    "transform": {
+      "^.+\\.(ts)$": "<rootDir>/node_modules/ts-jest"
+    },
+    "preset": "ts-jest"
+  }
+}
