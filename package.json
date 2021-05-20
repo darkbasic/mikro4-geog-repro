@@ -17,10 +17,13 @@
     ]
   },
   "scripts": {
+    "docker": "docker-compose up",
     "start": "ts-node --files src/index.ts",
+    "start:docker": "DOCKER=true ts-node --files src/index.ts",
     "prestart:js": "yarn run compile",
     "start:js": "node build/src/index.js",
     "test": "jest",
+    "test:docker": "DOCKER=true jest",
     "lint": "gts lint \"src/**/*.ts\" \"tests/**/*.ts\"",
     "clean": "gts clean",
     "precompile": "yarn run clean && yarn run fix",

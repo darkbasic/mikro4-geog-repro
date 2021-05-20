@@ -4,7 +4,20 @@ import {addSampleData} from './db';
 
 const batchInsert: boolean = process.argv.includes('--batch-insert');
 
+const useDocker =
+  process.env.DOCKER === 'true' ||
+  process.env.DOCKER === 'TRUE' ||
+  process.env.DOCKER === '1';
+
 (async () => {
-  const orm = await MikroORM.init(config);
-  await addSampleData(orm, batchInsert);
+  const orm = await MikroORM.init({
+    ...config,
+    ...(useDocker && {port: 5433}),
+  });
+  await addSampleData({
+    orm,
+    wrap: useDocker,
+    batchInsert,
+    dropDb: config.dbName,
+  });
 })();

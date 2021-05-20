@@ -1,23 +1,47 @@
 import {IDatabaseDriver, Connection, MikroORM} from '@mikro-orm/core';
 import {Location} from '../mikro-orm/entities/Location';
 
-async function wipeDatabasePostgreSql(
-  orm: MikroORM<IDatabaseDriver<Connection>>,
-  wrap = false
-) {
+export async function wipeDatabasePostgreSql({
+  orm,
+  wrap = false,
+  dropDb,
+}: {
+  orm: MikroORM<IDatabaseDriver<Connection>>;
+  wrap?: boolean;
+  dropDb?: string;
+}) {
   const generator = orm.getSchemaGenerator();
 
-  await generator.dropSchema(wrap);
+  if (dropDb) {
+    await generator.dropDatabase(dropDb);
+    await generator.createDatabase(dropDb);
+  } else {
+    await generator.dropSchema(wrap);
+  }
+
+  try {
+    await orm.em.getConnection().execute('CREATE EXTENSION postgis;');
+  } catch (e) {
+    console.log(e.message);
+  }
+
   await generator.createSchema(wrap);
+
   orm.em.clear();
 }
 
-export async function addSampleData(
-  orm: MikroORM<IDatabaseDriver<Connection>>,
+export async function addSampleData({
+  orm,
+  wrap = false,
+  dropDb,
   batchInsert = false,
-  wrap = false
-) {
-  await wipeDatabasePostgreSql(orm, wrap);
+}: {
+  orm: MikroORM<IDatabaseDriver<Connection>>;
+  wrap?: boolean;
+  dropDb?: string;
+  batchInsert?: boolean;
+}) {
+  await wipeDatabasePostgreSql({orm, dropDb, wrap});
   const {em} = orm;
 
   for (const {city, latitude, longitude} of locations) {

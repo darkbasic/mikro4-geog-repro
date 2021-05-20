@@ -1,34 +1,24 @@
 import {MikroORM} from '@mikro-orm/core';
 import {PostgreSqlDriver} from '@mikro-orm/postgresql';
-import {BaseIdEntity} from '../src/mikro-orm/entities/BaseIdEntity';
-import {Location} from '../src/mikro-orm/entities/Location';
-import {addSampleData} from '../src/db';
+import {addSampleData, wipeDatabasePostgreSql} from '../src/db';
 import config from '../src/mikro-orm/config';
 
-export async function initORMPostgreSql() {
-  const orm = await MikroORM.init(config);
-  /*const orm = await MikroORM.init<PostgreSqlDriver>({
-    entities: [
-      BaseIdEntity,
-      Location,
-    ],
-    metadataProvider: config.metadataProvider,
-    dbName: config.dbName,
-    user: config.user,
-    password: config.password,
-    type: config.type,
-    forceUtcTimezone: config.forceUtcTimezone,
-    debug: ['query'],
-  });*/
+const useDocker =
+  process.env.DOCKER === 'true' ||
+  process.env.DOCKER === 'TRUE' ||
+  process.env.DOCKER === '1';
 
-  const connection = orm.em.getConnection();
-  try {
-    await connection.execute('CREATE EXTENSION postgis;');
-  } catch (e) {
-    console.log(e.message);
-  }
-  const generator = orm.getSchemaGenerator();
-  await generator.ensureDatabase();
+export async function initORMPostgreSql() {
+  const orm = await MikroORM.init({
+    ...config,
+    ...(useDocker && {port: 5433}),
+  });
+
+  await wipeDatabasePostgreSql({
+    orm,
+    wrap: useDocker,
+    dropDb: config.dbName,
+  });
 
   return {orm};
 }
@@ -36,5 +26,5 @@ export async function initORMPostgreSql() {
 export async function resetDatabase(
   orm: MikroORM<PostgreSqlDriver>
 ): Promise<void> {
-  return addSampleData(orm);
+  return addSampleData({orm, wrap: useDocker});
 }
